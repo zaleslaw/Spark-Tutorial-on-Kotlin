@@ -5,6 +5,17 @@ import org.jetbrains.spark.api.*
 
 const val DATA_DIRECTORY = "/sparkdata"
 
+data class StateNamesRow(
+    val Id: Int,
+    val Name: String,
+    val Year: Int,
+    val Gender: String,
+    val State: String,
+    val Count: Int
+)
+
+data class NationalNamesRow(val Id: Int, val Name: String, val Year: Int, val Gender: String, val Count: Int)
+
 fun main() {
     withSpark(
         props = mapOf("spark.sql.codegen.wholeStage" to false),
@@ -35,6 +46,15 @@ fun main() {
 
         val nationalNamesSchema = DataTypes.createStructType(fields)
 
+        val stateNamesDS = stateNames.downcast<Row, StateNamesRow>()
+
+        stateNamesDS.filter {
+            it.Year == 1900
+        }.map {
+            it.Year
+        }.show()
+
+
         val nationalNames: Dataset<Row> = spark.read()
             .option("header", "true")
             .schema(nationalNamesSchema)
@@ -43,21 +63,21 @@ fun main() {
         nationalNames.show()
         nationalNames.printSchema()
 
-        nationalNames.cache()
+        nationalNames.withCached {
+            // Step - 3: Simple dataframe operations
+            // Filter & select & orderBy
+            nationalNames
+                .where("Gender == 'M'")
+                .select("Name", "Year", "Count")
+                .orderBy("Name", "Year")
+                .show(100)
 
-        // Step - 3: Simple dataframe operations
-        // Filter & select & orderBy
-        nationalNames
-            .where("Gender == 'M'")
-            .select("Name", "Year", "Count")
-            .orderBy("Name", "Year")
-            .show(100)
-
-        // Registered births by year in US since 1880
-        nationalNames
-            .groupBy("Year")
-            .sum("Count").`as`("Sum")
-            .orderBy("Year")
-            .show(200)
+            // Registered births by year in US since 1880
+            nationalNames
+                .groupBy("Year")
+                .sum("Count").`as`("Sum")
+                .orderBy("Year")
+                .show(200)
+        }
     }
 }
