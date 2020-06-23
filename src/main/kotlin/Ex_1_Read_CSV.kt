@@ -1,9 +1,10 @@
+import org.apache.hadoop.log.LogLevel
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.types.DataTypes
 import org.jetbrains.spark.api.*
 
-const val DATA_DIRECTORY = "/sparkdata"
+private const val DATA_DIRECTORY = "/sparkdata"
 
 data class StateNamesRow(
     val Id: Int,
@@ -18,10 +19,11 @@ data class NationalNamesRow(val Id: Int, val Name: String, val Year: Int, val Ge
 
 fun main() {
     withSpark(
-        props = mapOf("spark.sql.codegen.wholeStage" to false),
         master = "local[2]",
         appName = "CSV_to_Parquet_JSON"
     ) {
+
+        spark.sparkContext.setLogLevel("ERROR")
 
         // Step - 1: Extract the schema
         // Read CSV and automatically extract the schema
