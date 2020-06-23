@@ -7,12 +7,12 @@ import org.jetbrains.spark.api.*
 private const val DATA_DIRECTORY = "/sparkdata"
 
 data class StateNamesRow(
-    val Id: Int,
-    val Name: String,
-    val Year: Int,
-    val Gender: String,
-    val State: String,
-    val Count: Int
+    val id: Int,
+    val name: String,
+    val year: Int,
+    val gender: String,
+    val state: String,
+    val count: Int
 )
 
 data class NationalNamesRow(val Id: Int, val Name: String, val Year: Int, val Gender: String, val Count: Int)
@@ -51,9 +51,9 @@ fun main() {
         val stateNamesDS = stateNames.downcast<Row, StateNamesRow>()
 
         stateNamesDS.filter {
-            it.Year == 1900
+            it.year == 1900
         }.map {
-            it.Year
+            it.year
         }.show()
 
 
